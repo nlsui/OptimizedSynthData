@@ -1,0 +1,11 @@
+git+https://github.com/nlsui/mistral-task2vec.git
+
+torch~=2.4.1
+pandas~=2.2.3
+transformers~=4.45.2
+datasets~=3.0.1
+numpy~=1.26.4
+tensorflow>=2.0.0
+tensorflow-hub>=0.11.0
+
+langchain~=0.3.3
