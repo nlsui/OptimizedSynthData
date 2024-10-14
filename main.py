@@ -1,3 +1,4 @@
+import preprocessing
 import sentence_encoding
 from absl import logging
 import torch
@@ -67,10 +68,10 @@ def synthesize_data(input_output_pairs, model_pipeline=None):
     generated_data = generator.generate(input_output_pairs)
 
     # Extract inputs from the generated pairs for embedding calculation
-    generated_inputs = [pair[0] for pair in generated_data]
+    generated_texts = [f"{pair[0]} {pair[1]}" for pair in generated_data]
 
     # Calculate embeddings for the generated data using the analyzer (or any embedding function)
-    embeddings = embed(generated_inputs)
+    embeddings = embed(generated_texts)
 
     # Calculate nearest neighbor distances using the metrics function
     distances = nearest_neighbor_distances(embeddings)
@@ -81,6 +82,8 @@ def synthesize_data(input_output_pairs, model_pipeline=None):
         print(f"Input: {pair[0]}")
         print(f"Output: {pair[1]}")
         print(f"Nearest Neighbor Distance: {distances[i]}\n")
+
+    preprocessing.TaskToVecEmbedding(generated_data, model_pipeline, model_pipeline.tokenizer)
 
     # Feed the generated pairs along with their respective distances to the analyzer's analyze function
     report = analyzer.analyze(generated_data, distances)

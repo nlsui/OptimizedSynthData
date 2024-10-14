@@ -1,8 +1,11 @@
-import torch
-from transformers import AutoTokenizer
-from datasets import load_dataset
-from torch.utils.data import Dataset
+import random
+
+import numpy as np
 import pandas as pd
+import torch
+from mistral_module import MistralTask2Vec
+from torch.utils.data import Dataset
+from transformers import AutoModelForCausalLM
 
 
 class PandasDataset(Dataset):
@@ -24,38 +27,72 @@ class PandasDataset(Dataset):
         return input_tensor, output_tensor
 
 
-def preprocess_dataset(dataset_name, model_name, split_ratio='train[:10%]', input_col='input', output_col='output', max_length=512, entries_per_dataset=64, num_datasets=10):
-    # Load dataset
-    dataset = load_dataset(dataset_name, split=split_ratio)
-    dataset = dataset.remove_columns(['instruction', 'text'])
-
-    # Limit the dataset to total required entries
-    total_entries = entries_per_dataset * num_datasets
-    if len(dataset) > total_entries:
-        dataset = dataset.select(range(total_entries))
-
-    # Initialize tokenizer
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-
+def preprocess_dataset(tokenizer, dataset, max_length=512):
     # Set pad_token if it doesn't exist
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
-    # Preprocess the entire dataset
+    # Process input-output pairs directly from tuples
     processed_data = {
-        input_col: [tokenizer(example[input_col], padding='max_length', truncation=True, max_length=max_length)['input_ids'] for example in dataset],
-        output_col: [tokenizer(example[output_col], padding='max_length', truncation=True, max_length=max_length)['input_ids'] for example in dataset]
+        'input': [
+            tokenizer(input_text, padding='max_length', truncation=True, max_length=max_length)['input_ids']
+            for input_text, _ in dataset
+        ],
+        'output': [
+            tokenizer(output_text, padding='max_length', truncation=True, max_length=max_length)['input_ids']
+            for _, output_text in dataset
+        ]
     }
 
     # Convert to DataFrame
     df = pd.DataFrame(processed_data)
 
-    # Split the dataset into `num_datasets` each with `entries_per_dataset` rows
-    datasets = [df.iloc[i * entries_per_dataset:(i + 1) * entries_per_dataset] for i in range(num_datasets)]
+    return df
 
-    return datasets
 
-# Example usage:
-dataset_name = "tatsu-lab/alpaca"
-processed_datasets = preprocess_dataset(dataset_name, entries_per_dataset=64, num_datasets=5)
-processed_datasets.append(processed_datasets[1])
+class MistralForCausalLMWithSkip(AutoModelForCausalLM):
+    def forward(self, input_ids=None, attention_mask=None, **kwargs):
+        start_from = kwargs.pop('start_from', 0)
+
+        # Pass inputs through the embedding layer
+        hidden_states = self.model.embed_tokens(input_ids)
+
+        # Process through the transformer layers, starting from the specified layer
+        for i, layer in enumerate(self.model.layers):
+            if i >= start_from:
+                hidden_states = layer(hidden_states, attention_mask=attention_mask)
+
+        # Apply final normalization and output layer
+        hidden_states = self.model.norm(hidden_states)
+        logits = self.lm_head(hidden_states)
+
+        return logits
+
+
+def TaskToVecEmbedding(dataset, probe_network, tokenizer):
+    # Set random seed for reproducibility
+    seed = 42  # Example seed; you can choose any integer
+    torch.manual_seed(seed)  # Controls PyTorch's random number generator
+    torch.cuda.manual_seed(seed)  # Controls randomness for CUDA, if you're using a GPU
+    torch.backends.cudnn.deterministic = True  # Ensures deterministic results for some operations
+    torch.backends.cudnn.benchmark = False  # Ensures deterministic behavior (may slow down training)
+
+    # Optional: Set seeds for other libraries if used
+    np.random.seed(seed)  # For NumPy's random number generator
+    random.seed(seed)  # Python's built-in random module
+
+    processed_dataset = preprocess_dataset(dataset, tokenizer)
+
+    print(f"Dataset :\n", processed_dataset.head())  # Display the first few rows of each dataset
+
+    loader_options = {
+        'num_workers': 2,
+        'batch_size': 1
+    }
+
+    # Process each of the 10 datasets and pack them into Task2Vec
+    task2vec_model = MistralTask2Vec(probe_network, loader_opts=loader_options, skip_layers=0, seed=seed)
+
+    dataset = PandasDataset(processed_dataset)  # Convert each DataFrame to a PandasDataset object
+    embedding = task2vec_model.embed(dataset)  # Embed the dataset with task2vec
+    print(embedding)
