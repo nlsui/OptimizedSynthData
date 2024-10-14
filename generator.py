@@ -2,20 +2,21 @@ from langchain import HuggingFacePipeline, PromptTemplate, LLMChain
 
 
 def _parse_generated_pairs(response_text):
-    # Split the response by "Input:" and "Output:" to extract new pairs
     lines = response_text.splitlines()
     new_pairs = []
     input_text, output_text = None, None
 
     for line in lines:
         if line.startswith("Input:"):
+            if input_text and output_text:
+                new_pairs.append((input_text, output_text))
             input_text = line.replace("Input:", "").strip()
+            output_text = None  # Reset output
         elif line.startswith("Output:"):
             output_text = line.replace("Output:", "").strip()
 
-        if input_text and output_text:
-            new_pairs.append((input_text, output_text))
-            input_text, output_text = None, None
+    if input_text and output_text:
+        new_pairs.append((input_text, output_text))
 
     return new_pairs
 
