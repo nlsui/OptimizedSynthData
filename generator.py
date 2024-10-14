@@ -26,7 +26,7 @@ class Generator:
         self.llm = HuggingFacePipeline(pipeline=model_pipeline)
 
         # Define the template for generating similar data points
-        self.template = """<s>[INST] You are a data generation assistant. Your task is to generate new data points 
+        self.template = """[INST] You are a data generation assistant. Your task is to generate new data points 
         that are similar to the given input-output pairs. Use the input-output format provided and generate 
         new examples that follow the same structure. The format is:
         Input: <input_example>
@@ -36,7 +36,7 @@ class Generator:
         {pairs}
 
         Now generate new input-output pairs following the format. Ensure the new pairs are realistic and parsable.
-        Only output the new data points in the same format, do not include any extra text. [/INST] </s>"""
+        Only output the new data points in the same format, do not include any extra text. [/INST]"""
 
         # Set up the PromptTemplate object
         self.prompt = PromptTemplate(template=self.template, input_variables=["pairs"])

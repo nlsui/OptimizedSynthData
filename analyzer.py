@@ -7,7 +7,7 @@ class Analyzer:
         self.llm = HuggingFacePipeline(pipeline=model_pipeline)
 
         # Define the prompt template for analysis
-        self.template = """<s>[INST] You are an expert data analyst. Your task is to review a dataset
+        self.template = """[INST] You are an expert data analyst. Your task is to review a dataset
         containing input-output pairs and their nearest neighbor distances. Based on the distances,
         assess whether the dataset has too much diversity, too little diversity, or whether certain 
         datapoints should be removed because they are either too close or too far from other points.
@@ -26,7 +26,7 @@ class Analyzer:
         Here are the input-output pairs and their distances:
         {data}
 
-        Please generate your report based on this information. [/INST] </s>"""
+        Please generate your report based on this information. [/INST]"""
 
         # Set up the PromptTemplate object
         self.prompt = PromptTemplate(template=self.template, input_variables=["data"])
