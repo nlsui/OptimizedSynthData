@@ -111,14 +111,14 @@ def synthesize_data(input_output_pairs, model=None):
     tas2vec_embeddings.append(task2vec.embed(generated_data))
 
     # Feed the generated pairs along with their respective distances to the analyzer's analyze function
-    report = analyzer.analyze(generated_data, below_threshold, above_threshold)
+    report = analyzer.analyze(below_threshold, above_threshold)
 
     print(report)
 
     preprocessing.plot_similarity(tas2vec_embeddings)
 
     # Return the generated data, embeddings, and distances for further use
-    return generated_data, embeddings, distances
+    return generated_data, embeddings
 
 
 def main():
