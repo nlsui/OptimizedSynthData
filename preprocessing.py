@@ -98,8 +98,5 @@ class Task2Vec:
     def embed(self, dataset):
         processed_dataset = preprocess_dataset(dataset, self.tokenizer)
 
-        print(f"Dataset :\n", processed_dataset.head())  # Display the first few rows of each dataset
-
         dataset = PandasDataset(processed_dataset)  # Convert each DataFrame to a PandasDataset object
-        embedding = self.model.embed(dataset)  # Embed the dataset with task2vec
-        print(embedding)
+        return self.model.embed(dataset)  # Embed the dataset with task2vec
