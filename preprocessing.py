@@ -27,7 +27,7 @@ class PandasDataset(Dataset):
         return input_tensor, output_tensor
 
 
-def preprocess_dataset(tokenizer, dataset, max_length=512):
+def preprocess_dataset(dataset, tokenizer, max_length=512):
     # Set pad_token if it doesn't exist
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
