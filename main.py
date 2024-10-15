@@ -99,14 +99,13 @@ def synthesize_data(input_output_pairs, model=None):
     # Calculate embeddings for the generated data using the analyzer (or any embedding function)
     data = embed(generated_data)
 
-
     # Step 2: Classify the embeddings based on the calculated thresholds
     within_threshold, below_threshold, above_threshold = classify_embeddings(data, lower_threshold, upper_threshold)
 
     # Print results
-    print("Within Threshold:", within_threshold)
-    print("Below Threshold:", below_threshold)
-    print("Above Threshold:", above_threshold)
+    print("Within Threshold:", len(within_threshold))
+    print("Below Threshold:", len(below_threshold))
+    print("Above Threshold:", len(above_threshold))
 
     tas2vec_embeddings.append(task2vec.embed(generated_data))
 
