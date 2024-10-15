@@ -7,7 +7,7 @@ def _remove_instructions(response_text):
     Remove everything between [INST] and [/INST] tags.
     """
     # Remove anything between [INST] and [/INST]
-    cleaned_text = re.sub(r"<s>\[INST\](.*?)\[/INST\]</s>", "", response_text, flags=re.DOTALL)
+    cleaned_text = re.sub(r"\[INST\](.*?)\[/INST\]", "", response_text, flags=re.DOTALL)
     return cleaned_text
 
 

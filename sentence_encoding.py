@@ -10,7 +10,8 @@ class SentenceEncoder:
         # Reduce logging output.
         logging.set_verbosity(logging.ERROR)
 
-    def __call__(self, input_text):
+    def __call__(self, input_output_pairs):
+        input_text = [f"{pair[0]} {pair[1]}" for pair in input_output_pairs]
         # This allows the instance to be called like a function
         return self.model(input_text)
 
