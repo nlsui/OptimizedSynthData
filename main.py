@@ -29,7 +29,7 @@ def initialize_model():
     )
 
     # Load the model and tokenizer
-    model_4bit = AutoModelForCausalLM.from_pretrained(
+    model_4bit = preprocessing.MistralForCausalLMWithSkip.from_pretrained(
         "mistralai/Mistral-7B-Instruct-v0.1",
         device_map="auto",
         quantization_config=quantization_config,
