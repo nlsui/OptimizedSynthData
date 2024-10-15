@@ -35,8 +35,10 @@ def initialize_model():
         quantization_config=quantization_config,
     )
 
-    tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.1")
+    return model_4bit
 
+
+def setup_pipeline(model_4bit, tokenizer):
     # Create a pipeline
     pipeline_inst = pipeline(
         "text-generation",
@@ -55,10 +57,14 @@ def initialize_model():
     return pipeline_inst
 
 
-def synthesize_data(input_output_pairs, model_pipeline=None):
+def synthesize_data(input_output_pairs, model=None):
     # If no model is supplied, initialize one
-    if model_pipeline is None:
-        model_pipeline = initialize_model()
+    if model is None:
+        model = initialize_model()
+
+    tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.1")
+
+    model_pipeline = setup_pipeline(model, tokenizer)
 
     # Initialize the generator and analyzer on the same model
     generator = Generator(model_pipeline)
@@ -83,7 +89,7 @@ def synthesize_data(input_output_pairs, model_pipeline=None):
         print(f"Output: {pair[1]}")
         print(f"Nearest Neighbor Distance: {distances[i]}\n")
 
-    preprocessing.TaskToVecEmbedding(generated_data, model_pipeline, model_pipeline.tokenizer)
+    preprocessing.TaskToVecEmbedding(generated_data, model, tokenizer)
 
     # Feed the generated pairs along with their respective distances to the analyzer's analyze function
     report = analyzer.analyze(generated_data, distances)

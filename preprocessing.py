@@ -90,8 +90,10 @@ def TaskToVecEmbedding(dataset, probe_network, tokenizer):
         'batch_size': 1
     }
 
+    model_with_skip = MistralForCausalLMWithSkip(probe_network)
+
     # Process each of the 10 datasets and pack them into Task2Vec
-    task2vec_model = MistralTask2Vec(probe_network, loader_opts=loader_options, skip_layers=0, seed=seed)
+    task2vec_model = MistralTask2Vec(model_with_skip, loader_opts=loader_options, skip_layers=0, seed=seed)
 
     dataset = PandasDataset(processed_dataset)  # Convert each DataFrame to a PandasDataset object
     embedding = task2vec_model.embed(dataset)  # Embed the dataset with task2vec
