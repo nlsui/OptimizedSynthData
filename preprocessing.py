@@ -68,31 +68,33 @@ class MistralForCausalLMWithSkip(AutoModelForCausalLM):
 
         return logits
 
+class Task2Vec:
+    def __init__(self, probe_network, tokenizer):
+        # Set random seed for reproducibility
+        seed = 42  # Example seed; you can choose any integer
+        torch.manual_seed(seed)  # Controls PyTorch's random number generator
+        torch.cuda.manual_seed(seed)  # Controls randomness for CUDA, if you're using a GPU
+        torch.backends.cudnn.deterministic = True  # Ensures deterministic results for some operations
+        torch.backends.cudnn.benchmark = False  # Ensures deterministic behavior (may slow down training)
 
-def TaskToVecEmbedding(dataset, probe_network, tokenizer):
-    # Set random seed for reproducibility
-    seed = 42  # Example seed; you can choose any integer
-    torch.manual_seed(seed)  # Controls PyTorch's random number generator
-    torch.cuda.manual_seed(seed)  # Controls randomness for CUDA, if you're using a GPU
-    torch.backends.cudnn.deterministic = True  # Ensures deterministic results for some operations
-    torch.backends.cudnn.benchmark = False  # Ensures deterministic behavior (may slow down training)
+        # Optional: Set seeds for other libraries if used
+        np.random.seed(seed)  # For NumPy's random number generator
+        random.seed(seed)  # Python's built-in random module
 
-    # Optional: Set seeds for other libraries if used
-    np.random.seed(seed)  # For NumPy's random number generator
-    random.seed(seed)  # Python's built-in random module
+        loader_options = {
+            'num_workers': 2,
+            'batch_size': 1
+        }
 
-    processed_dataset = preprocess_dataset(dataset, tokenizer)
+        self.model = MistralTask2Vec(probe_network, loader_opts=loader_options, skip_layers=0, seed=seed)
+        self.tokenizer = tokenizer
 
-    print(f"Dataset :\n", processed_dataset.head())  # Display the first few rows of each dataset
+    def embed(self, dataset):
+        processed_dataset = preprocess_dataset(dataset, self.tokenizer)
 
-    loader_options = {
-        'num_workers': 2,
-        'batch_size': 1
-    }
+        print(f"Dataset :\n", processed_dataset.head())  # Display the first few rows of each dataset
 
-    # Process each of the 10 datasets and pack them into Task2Vec
-    task2vec_model = MistralTask2Vec(probe_network, loader_opts=loader_options, skip_layers=0, seed=seed)
+        dataset = PandasDataset(processed_dataset)  # Convert each DataFrame to a PandasDataset object
+        embedding = self.model.embed(dataset)  # Embed the dataset with task2vec
+        print(embedding)
 
-    dataset = PandasDataset(processed_dataset)  # Convert each DataFrame to a PandasDataset object
-    embedding = task2vec_model.embed(dataset)  # Embed the dataset with task2vec
-    print(embedding)

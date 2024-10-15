@@ -69,6 +69,7 @@ def synthesize_data(input_output_pairs, model=None):
     # Initialize the generator and analyzer on the same model
     generator = Generator(model_pipeline)
     analyzer = Analyzer(model_pipeline)  # Assuming Analyzer handles embeddings and analysis
+    task2vec = preprocessing.Task2Vec(model, tokenizer)
 
     # Generate new data using the input-output pairs
     generated_data = generator.generate(input_output_pairs)
@@ -89,7 +90,7 @@ def synthesize_data(input_output_pairs, model=None):
         print(f"Output: {pair[1]}")
         print(f"Nearest Neighbor Distance: {distances[i]}\n")
 
-    preprocessing.TaskToVecEmbedding(generated_data, model, tokenizer)
+    task2vec.embed(generated_data)
 
     # Feed the generated pairs along with their respective distances to the analyzer's analyze function
     report = analyzer.analyze(generated_data, distances)
