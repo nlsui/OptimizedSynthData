@@ -1,8 +1,18 @@
 from langchain import HuggingFacePipeline, PromptTemplate, LLMChain
+import re
+
+
+def _remove_instructions(response_text):
+    """
+    Remove everything between [INST] and [/INST] tags.
+    """
+    # Remove anything between [INST] and [/INST]
+    cleaned_text = re.sub(r"<s>\[INST\](.*?)\[/INST\]</s>", "", response_text, flags=re.DOTALL)
+    return cleaned_text
 
 
 def _parse_generated_pairs(response_text):
-    lines = response_text.splitlines()
+    lines = _remove_instructions(response_text).splitlines()
     new_pairs = []
     input_text, output_text = None, None
 

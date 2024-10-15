@@ -2,6 +2,7 @@ import random
 
 import numpy as np
 import pandas as pd
+import task_similarity
 import torch
 from mistral_module import MistralTask2Vec
 from torch.utils.data import Dataset
@@ -50,6 +51,10 @@ def preprocess_dataset(dataset, tokenizer, max_length=512):
     return df
 
 
+def plot_similarity(embeddings):
+    task_similarity.plot_distance_matrix(embeddings, [str(i) for i in range(embeddings.length)])
+
+
 class MistralForCausalLMWithSkip(AutoModelForCausalLM):
     def forward(self, input_ids=None, attention_mask=None, **kwargs):
         start_from = kwargs.pop('start_from', 0)
@@ -67,6 +72,7 @@ class MistralForCausalLMWithSkip(AutoModelForCausalLM):
         logits = self.lm_head(hidden_states)
 
         return logits
+
 
 class Task2Vec:
     def __init__(self, probe_network, tokenizer):
@@ -97,4 +103,3 @@ class Task2Vec:
         dataset = PandasDataset(processed_dataset)  # Convert each DataFrame to a PandasDataset object
         embedding = self.model.embed(dataset)  # Embed the dataset with task2vec
         print(embedding)
-
