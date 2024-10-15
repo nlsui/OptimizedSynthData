@@ -99,6 +99,8 @@ def synthesize_data(input_output_pairs, model=None):
 
     print(report)
 
+    preprocessing.plot_similarity(tas2vec_embeddings)
+
     # Return the generated data, embeddings, and distances for further use
     return generated_data, embeddings, distances
 
