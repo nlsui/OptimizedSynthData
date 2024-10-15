@@ -52,7 +52,7 @@ def preprocess_dataset(dataset, tokenizer, max_length=512):
 
 
 def plot_similarity(embeddings):
-    task_similarity.plot_distance_matrix(embeddings, [str(i) for i in range(embeddings.length)])
+    task_similarity.plot_distance_matrix(embeddings, [str(i) for i in range(len(embeddings))])
 
 
 class MistralForCausalLMWithSkip(AutoModelForCausalLM):
