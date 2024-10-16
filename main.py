@@ -159,7 +159,14 @@ def main():
 
     # Call the synthesize_data function with the 10 input-output pairs
     data = synthesize_data(input_output_pairs)
-    print(data)
+    # Loop through the data_blocks and print only the input-output pairs
+    for block_idx, block in enumerate(data):
+        print(f"\nData Block {block_idx + 1}:\n")
+        for item in block:
+            # Extract and print only the input-output pair from the dictionary
+            input_text, output_text = item['text']
+            print(f"Input: {input_text}")
+            print(f"Output: {output_text}")
 
 
 if __name__ == "__main__":
