@@ -63,6 +63,8 @@ class Generator:
         # Generate a response using the string format of pairs
         response = llm_chain.run({"pairs": pairs_str, "block_size": self.block_size})
 
+        print(response)
+
         # Split the response into new input-output pairs
         generated_pairs = _parse_generated_pairs(response)
 
