@@ -77,12 +77,6 @@ def setup_pipeline(model_4bit, tokenizer):
 
 
 def synthesize_data(input_output_pairs, config: Config = None):
-    """
-    Main function with optional config parameter.
-
-    Parameters:
-    - config (Config, optional): A configuration object. If not provided, defaults will be used.
-    """
     # If no config is provided, use default configuration
     if config is None:
         config = Config()
@@ -102,9 +96,7 @@ def synthesize_data(input_output_pairs, config: Config = None):
         )
 
     model = initialize_model(quantization_config, config.model_name)
-
     tokenizer = AutoTokenizer.from_pretrained(config.model_name)
-
     model_pipeline = setup_pipeline(model, tokenizer)
 
     # Initialize the generator and analyzer on the same model
@@ -115,36 +107,39 @@ def synthesize_data(input_output_pairs, config: Config = None):
     # calculate metrics of initial data
     tas2vec_embeddings = [task2vec.embed(input_output_pairs)]
     initial_data = embed(input_output_pairs)
+    data_blocks = [initial_data]
 
     # Step 1: Calculate the thresholds based on the embeddings
     embeddings = [item['embedding'] for item in initial_data]
     lower_threshold, upper_threshold = calculate_threshold(embeddings)
 
-    # Generate new data using the input-output pairs
-    generated_data = generator.generate(input_output_pairs)
+    for _ in range(config.block_size):
+        # Generate new data using the input-output pairs
+        generated_data = generator.generate(input_output_pairs)
 
-    # Calculate embeddings for the generated data using the analyzer (or any embedding function)
-    data = embed(generated_data)
+        # Calculate embeddings for the generated data using the analyzer (or any embedding function)
+        data = embed(generated_data)
 
-    # Step 2: Classify the embeddings based on the calculated thresholds
-    within_threshold, below_threshold, above_threshold = classify_embeddings(data, lower_threshold, upper_threshold)
+        # Step 2: Classify the embeddings based on the calculated thresholds
+        within_threshold, below_threshold, above_threshold = classify_embeddings(data, lower_threshold, upper_threshold)
 
-    # Print results
-    print("Within Threshold:", len(within_threshold))
-    print("Below Threshold:", len(below_threshold))
-    print("Above Threshold:", len(above_threshold))
+        # Print results
+        print("Within Threshold:", len(within_threshold))
+        print("Below Threshold:", len(below_threshold))
+        print("Above Threshold:", len(above_threshold))
 
-    tas2vec_embeddings.append(task2vec.embed(generated_data))
+        tas2vec_embeddings.append(task2vec.embed(generated_data))
+        data_blocks.append(within_threshold)
 
-    # Feed the generated pairs along with their respective distances to the analyzer's analyze function
-    report = analyzer.analyze(below_threshold, above_threshold)
+        # Feed the generated pairs along with their respective distances to the analyzer's analyze function
+        report = analyzer.analyze(below_threshold, above_threshold)
 
-    print(report)
+        print(report)
 
     preprocessing.plot_similarity(tas2vec_embeddings)
 
     # Return the generated data, embeddings, and distances for further use
-    return generated_data, embeddings
+    return data_blocks
 
 
 def main():
@@ -163,7 +158,8 @@ def main():
     ]
 
     # Call the synthesize_data function with the 10 input-output pairs
-    synthesize_data(input_output_pairs)
+    data = synthesize_data(input_output_pairs)
+    print(data)
 
 
 if __name__ == "__main__":
