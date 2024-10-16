@@ -32,7 +32,7 @@ def _parse_generated_pairs(response_text):
 
 
 class Generator:
-    def __init__(self, model_pipeline):
+    def __init__(self, model_pipeline, block_size):
         # Set the model pipeline (from main.py)
         self.llm = HuggingFacePipeline(pipeline=model_pipeline)
 
@@ -46,11 +46,12 @@ class Generator:
         Here are the input-output pairs:
         {pairs}
 
-        Now generate 10 new input-output pairs following the format. Ensure the new pairs are realistic and parsable.
+        Now generate {block_size} new input-output pairs following the format. Ensure the new pairs are realistic and parsable.
         Only output the new data points in the same format, do not include any extra text. [/INST]"""
 
         # Set up the PromptTemplate object
-        self.prompt = PromptTemplate(template=self.template, input_variables=["pairs"])
+        self.prompt = PromptTemplate(template=self.template, input_variables=["pairs", "block_size"])
+        self.block_size = block_size
 
     def generate(self, input_output_pairs):
         # Convert list of input-output pairs to string format
@@ -60,7 +61,7 @@ class Generator:
         llm_chain = LLMChain(prompt=self.prompt, llm=self.llm)
 
         # Generate a response using the string format of pairs
-        response = llm_chain.run({"pairs": pairs_str})
+        response = llm_chain.run({"pairs": pairs_str, "block_size": self.block_size})
 
         # Split the response into new input-output pairs
         generated_pairs = _parse_generated_pairs(response)

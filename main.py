@@ -17,6 +17,8 @@ class Config:
     model_name: str = "mistralai/Mistral-7B-Instruct-v0.1"
     use_quantization: bool = True
     quantization_type: str = "4bit"
+    block_size = 10
+    block_count = 10
 
 
 # Instantiate the encoder
@@ -106,7 +108,7 @@ def synthesize_data(input_output_pairs, config: Config = None):
     model_pipeline = setup_pipeline(model, tokenizer)
 
     # Initialize the generator and analyzer on the same model
-    generator = Generator(model_pipeline)
+    generator = Generator(model_pipeline, config.block_size)
     analyzer = Analyzer(model_pipeline)  # Assuming Analyzer handles embeddings and analysis
     task2vec = preprocessing.Task2Vec(model, tokenizer)
 
