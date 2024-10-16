@@ -1,5 +1,6 @@
 from langchain import HuggingFacePipeline, PromptTemplate, LLMChain
 
+
 class Analyzer:
     def __init__(self, model_pipeline):
         # Set the model pipeline (from main.py)
