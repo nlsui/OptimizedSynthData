@@ -46,7 +46,7 @@ class Generator:
         Here are the input-output pairs:
         {pairs}
 
-        Now generate new input-output pairs following the format. Ensure the new pairs are realistic and parsable.
+        Now generate 10 new input-output pairs following the format. Ensure the new pairs are realistic and parsable.
         Only output the new data points in the same format, do not include any extra text. [/INST]"""
 
         # Set up the PromptTemplate object
