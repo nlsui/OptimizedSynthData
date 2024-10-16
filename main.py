@@ -1,11 +1,23 @@
+from dataclasses import dataclass
+
+import torch
+from absl import logging
+from transformers import BitsAndBytesConfig, AutoTokenizer, pipeline
+
 import preprocessing
 import sentence_encoding
-from absl import logging
-import torch
-from transformers import BitsAndBytesConfig, AutoModelForCausalLM, AutoTokenizer, pipeline
-from metrics import nearest_neighbor_distances, calculate_threshold, classify_embeddings
 from analyzer import Analyzer
 from generator import Generator
+from metrics import calculate_threshold, classify_embeddings
+
+
+@dataclass
+class Config:
+    # Example configuration values (you can add more as needed)
+    model_name: str = "mistralai/Mistral-7B-Instruct-v0.1"
+    use_quantization: bool = True
+    quantization_type: str = "4bit"
+
 
 # Instantiate the encoder
 encoder = sentence_encoding.SentenceEncoder()
@@ -33,18 +45,9 @@ def embed(input_output_pairs):
     return embedded_data
 
 
-def initialize_model():
-    # Set up quantization config
-    quantization_config = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_compute_dtype=torch.float16,
-        bnb_4bit_quant_type="nf4",
-        bnb_4bit_use_double_quant=True,
-    )
-
-    # Load the model and tokenizer
+def initialize_model(quantization_config, model_name):
     model_4bit = preprocessing.MistralForCausalLMWithSkip.from_pretrained(
-        "mistralai/Mistral-7B-Instruct-v0.1",
+        model_name,
         device_map="auto",
         quantization_config=quantization_config,
     )
@@ -71,12 +74,34 @@ def setup_pipeline(model_4bit, tokenizer):
     return pipeline_inst
 
 
-def synthesize_data(input_output_pairs, model=None):
-    # If no model is supplied, initialize one
-    if model is None:
-        model = initialize_model()
+def synthesize_data(input_output_pairs, config: Config = None):
+    """
+    Main function with optional config parameter.
 
-    tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.1")
+    Parameters:
+    - config (Config, optional): A configuration object. If not provided, defaults will be used.
+    """
+    # If no config is provided, use default configuration
+    if config is None:
+        config = Config()
+
+    # Now you can access config values like config.model_name, config.max_length, etc.
+    print(f"Using model: {config.model_name}")
+    print(f"Quantization enabled: {config.use_quantization}")
+
+    # Example of using configuration values in your logic:
+    quantization_config = None
+    if config.use_quantization:
+        quantization_config = BitsAndBytesConfig(
+            load_in_4bit=(config.quantization_type == "4bit"),
+            bnb_4bit_compute_dtype=torch.float16,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_use_double_quant=True,
+        )
+
+    model = initialize_model(quantization_config, config.model_name)
+
+    tokenizer = AutoTokenizer.from_pretrained(config.model_name)
 
     model_pipeline = setup_pipeline(model, tokenizer)
 
