@@ -97,13 +97,12 @@ def synthesize_data(input_output_pairs, config: Config = None):
         )
 
     model = initialize_model(quantization_config, config.model_name)
-    # task2vec_model = initialize_model(quantization_config, config.model_name)
     tokenizer = AutoTokenizer.from_pretrained(config.model_name)
     model_pipeline = setup_pipeline(model, tokenizer)
 
     # Initialize the generator and analyzer on the same model
     generator = Generator(model_pipeline, config.block_size)
-    # analyzer = Analyzer(model_pipeline)  # Assuming Analyzer handles embeddings and analysis
+    analyzer = Analyzer(model_pipeline)  # Assuming Analyzer handles embeddings and analysis
     task2vec = preprocessing.Task2Vec(model, tokenizer)
 
     # calculate metrics of initial data
@@ -137,8 +136,8 @@ def synthesize_data(input_output_pairs, config: Config = None):
         data_blocks.append(within_threshold)
 
         # Feed the generated pairs along with their respective distances to the analyzer's analyze function
-        # report = analyzer.analyze(below_threshold, above_threshold)
-        # print(report)
+        report = analyzer.analyze(below_threshold, above_threshold)
+        print(report)
 
     preprocessing.plot_similarity(tas2vec_embeddings)
 
