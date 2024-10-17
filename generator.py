@@ -1,3 +1,7 @@
+import random
+
+import numpy as np
+import torch
 from langchain import HuggingFacePipeline, PromptTemplate, LLMChain
 import re
 
@@ -56,6 +60,10 @@ class Generator:
     def generate(self, input_output_pairs):
         # Convert list of input-output pairs to string format
         pairs_str = "\n".join([f"Input: {pair[0]}\nOutput: {pair[1]}" for pair in input_output_pairs])
+
+        random.seed(None)
+        torch.manual_seed(torch.seed())
+        np.random.seed(None)
 
         # Create an LLMChain with the model and the prompt
         llm_chain = LLMChain(prompt=self.prompt, llm=self.llm)
