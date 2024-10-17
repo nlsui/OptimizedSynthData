@@ -101,11 +101,11 @@ def synthesize_data(input_output_pairs, config: Config = None):
 
     # Initialize the generator and analyzer on the same model
     generator = Generator(model_pipeline, config.block_size)
-    analyzer = Analyzer(model_pipeline)  # Assuming Analyzer handles embeddings and analysis
-    task2vec = preprocessing.Task2Vec(model, tokenizer)
+    # analyzer = Analyzer(model_pipeline)  # Assuming Analyzer handles embeddings and analysis
+    # task2vec = preprocessing.Task2Vec(model, tokenizer)
 
     # calculate metrics of initial data
-    tas2vec_embeddings = [task2vec.embed(input_output_pairs)]
+    # tas2vec_embeddings = [task2vec.embed(input_output_pairs)]
     initial_data = embed(input_output_pairs)
     data_blocks = [initial_data]
 
@@ -128,14 +128,14 @@ def synthesize_data(input_output_pairs, config: Config = None):
         print("Below Threshold:", len(below_threshold))
         print("Above Threshold:", len(above_threshold))
 
-        tas2vec_embeddings.append(task2vec.embed(generated_data))
+        # tas2vec_embeddings.append(task2vec.embed(generated_data))
         data_blocks.append(within_threshold)
 
         # Feed the generated pairs along with their respective distances to the analyzer's analyze function
         # report = analyzer.analyze(below_threshold, above_threshold)
         # print(report)
 
-    preprocessing.plot_similarity(tas2vec_embeddings)
+    # preprocessing.plot_similarity(tas2vec_embeddings)
 
     # Return the generated data, embeddings, and distances for further use
     return data_blocks
