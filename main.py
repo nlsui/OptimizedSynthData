@@ -133,9 +133,6 @@ def synthesize_data(input_output_pairs, config: Config = None):
         print("Below Threshold:", len(below_threshold))
         print("Above Threshold:", len(above_threshold))
 
-        if i == 7:
-            tas2vec_embeddings.append(task2vec.embed(generated_data))
-
         tas2vec_embeddings.append(task2vec.embed(generated_data))
         data_blocks.append(within_threshold)
 
