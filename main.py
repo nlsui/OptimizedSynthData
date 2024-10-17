@@ -63,6 +63,7 @@ def setup_pipeline(model_4bit, tokenizer):
         "text-generation",
         model=model_4bit,
         tokenizer=tokenizer,
+        temperature=0.9,
         use_cache=True,
         device_map="auto",
         max_length=2500,
@@ -96,14 +97,14 @@ def synthesize_data(input_output_pairs, config: Config = None):
         )
 
     model = initialize_model(quantization_config, config.model_name)
-    task2vec_model = initialize_model(quantization_config, config.model_name)
+    # task2vec_model = initialize_model(quantization_config, config.model_name)
     tokenizer = AutoTokenizer.from_pretrained(config.model_name)
     model_pipeline = setup_pipeline(model, tokenizer)
 
     # Initialize the generator and analyzer on the same model
     generator = Generator(model_pipeline, config.block_size)
     # analyzer = Analyzer(model_pipeline)  # Assuming Analyzer handles embeddings and analysis
-    task2vec = preprocessing.Task2Vec(task2vec_model, tokenizer)
+    task2vec = preprocessing.Task2Vec(model, tokenizer)
 
     # calculate metrics of initial data
     tas2vec_embeddings = [task2vec.embed(input_output_pairs)]
