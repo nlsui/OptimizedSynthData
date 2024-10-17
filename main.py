@@ -115,7 +115,10 @@ def synthesize_data(input_output_pairs, config: Config = None):
     embeddings = [item['embedding'] for item in initial_data]
     lower_threshold, upper_threshold = calculate_threshold(embeddings)
 
-    for _ in range(config.block_size):
+    print("lower threshold:", lower_threshold)
+    print("upper threshold", upper_threshold)
+
+    for i in range(config.block_size):
         # Generate new data using the input-output pairs
         generated_data = generator.generate(input_output_pairs)
 
@@ -129,6 +132,9 @@ def synthesize_data(input_output_pairs, config: Config = None):
         print("Within Threshold:", len(within_threshold))
         print("Below Threshold:", len(below_threshold))
         print("Above Threshold:", len(above_threshold))
+
+        if i == 7:
+            tas2vec_embeddings.append(task2vec.embed(generated_data))
 
         tas2vec_embeddings.append(task2vec.embed(generated_data))
         data_blocks.append(within_threshold)
