@@ -7,31 +7,23 @@ class Analyzer:
         self.llm = HuggingFacePipeline(pipeline=model_pipeline)
 
         # Define the prompt template for analysis
-        self.template = """[INST] You are an expert data analyst. Your task is to review a dataset
-        containing input-output pairs that are classified based on their nearest neighbor distances.
-        Your job is to assess whether the dataset has too much diversity, too little diversity, or whether
-        certain datapoints should be removed because they are either too similar (too close) or too far from others.
+        self.adjust_examples_template = """[INST] You are an expert data analyst. Your task is to review a dataset
+        containing input-output pairs that were used to generate a new dataset and an evaluation of the results!
+        
+        Here are the given examples:
+        {examples}
 
-        For each data point, you will be provided:
-        - The input.
-        - The output.
-        - A classification of whether the point is too close, too far, or within normal range.
-
-        After reviewing the data, write a report that:
-        - Recommends whether the dataset has appropriate diversity.
-        - Identifies any datapoints that are too similar (too close).
-        - Identifies any datapoints that are too far from the others.
-        - Suggests if any datapoints should be cut due to these issues.
-
-        Here are the input-output pairs and their classifications:
+        Here are the generated pairs and their classifications:
         {data}
 
-        Please generate your report based on this information. [/INST]"""
+        Based on these results, adjust the examples fo the next generation. Remove examples that might have caused 
+        the generation of bad data and replace it with a good classified generated pair.
+        The output should be 10 curated input output pairs.[/INST]"""
 
         # Set up the PromptTemplate object
-        self.prompt = PromptTemplate(template=self.template, input_variables=["data"])
+        self.adjust_examples_prompt = PromptTemplate(template=self.adjust_examples_template, input_variables=["data"])
 
-    def analyze(self, below_threshold, above_threshold):
+    def analyze(self, below_threshold, above_threshold, within_range, previous_examples):
         """
         Analyze the generated data classified based on thresholds and produce a report.
 
@@ -59,10 +51,24 @@ class Analyzer:
             data_str += "\n".join([f"Input: {item['text'][0]}\nOutput: {item['text'][1]}\nStatus: Too far from others"
                                    for item in above_threshold])
 
+        # Add the data points classified as "in range"
+        if within_range:
+            data_str += "\n### Data Points Inside Threshold ###\n"
+            data_str += "\n".join(
+                [f"Input: {item['text'][0]}\nOutput: {item['text'][1]}\nStatus: Just right"
+                 for item in within_range])
+
+        # Add the data points classified as "too far"
+        if previous_examples:
+            data_str += "\n### Previous examples ###\n"
+            data_str += "\n".join(
+                [f"Input: {item['text'][0]}\nOutput: {item['text'][1]}\nStatus: Given example"
+                 for item in previous_examples])
+
         # Create an LLMChain with the model and the prompt
-        llm_chain = LLMChain(prompt=self.prompt, llm=self.llm)
+        llm_chain = LLMChain(prompt=self.adjust_examples_prompt, llm=self.llm)
 
         # Generate the report using the formatted data
-        report = llm_chain.run({"data": data_str})
+        report = llm_chain.run({"examples": previous_examples, "data": data_str})
 
         return report
