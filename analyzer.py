@@ -37,6 +37,7 @@ class Analyzer:
         """
 
         # Format the data for the analysis prompt, labeling based on thresholds
+        example_str = ""
         data_str = ""
 
         # Add the data points classified as "too close"
@@ -69,6 +70,6 @@ class Analyzer:
         llm_chain = LLMChain(prompt=self.adjust_examples_prompt, llm=self.llm)
 
         # Generate the report using the formatted data
-        report = llm_chain.run({"examples": previous_examples, "data": data_str})
+        report = llm_chain.run({"examples": example_str, "data": data_str})
 
         return report
