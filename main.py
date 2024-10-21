@@ -7,7 +7,7 @@ from transformers import BitsAndBytesConfig, AutoTokenizer, pipeline
 import preprocessing
 import sentence_encoding
 from analyzer import Analyzer
-from generator import Generator
+from generator import Generator, _parse_generated_pairs
 from metrics import calculate_threshold, classify_embeddings
 
 
@@ -139,6 +139,8 @@ def synthesize_data_few_shot(input_output_pairs, config: Config = None):
         # Feed the generated pairs along with their respective distances to the analyzer's analyze function
         report = analyzer.analyze(below_threshold, above_threshold, within_threshold, initial_data)
         print(report)
+        new_inputs = _parse_generated_pairs(report)
+        print(new_inputs)
 
     preprocessing.plot_similarity(tas2vec_embeddings)
 
