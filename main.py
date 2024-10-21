@@ -77,7 +77,7 @@ def setup_pipeline(model_4bit, tokenizer):
     return pipeline_inst
 
 
-def synthesize_data(input_output_pairs, config: Config = None):
+def synthesize_data_few_shot(input_output_pairs, config: Config = None):
     # If no config is provided, use default configuration
     if config is None:
         config = Config()
@@ -161,7 +161,7 @@ def main():
     ]
 
     # Call the synthesize_data function with the 10 input-output pairs
-    data = synthesize_data(input_output_pairs)
+    data = synthesize_data_few_shot(input_output_pairs)
     # Loop through the data_blocks and print only the input-output pairs
     for block_idx, block in enumerate(data):
         print(f"\nData Block {block_idx + 1}:\n")
