@@ -17,7 +17,8 @@ class Analyzer:
         {data}
 
         Based on these results, adjust the examples fo the next generation. Remove examples that might have caused 
-        the generation of bad data and replace it with a good classified generated pair.
+        the generation of bad data (should be data that's similar to a bad data-point)
+        and replace it with a good classified generated pair.
         The output should be 10 curated input output pairs.[/INST]"""
 
         # Set up the PromptTemplate object
@@ -42,28 +43,28 @@ class Analyzer:
 
         # Add the data points classified as "too close"
         if below_threshold:
-            data_str += "\n### Data Points Too Close (Below Threshold) ###\n"
-            data_str += "\n".join([f"Input: {item['text'][0]}\nOutput: {item['text'][1]}\nStatus: Too close to others"
+            data_str += "\n### Data Points Too Close To Others ###\n"
+            data_str += "\n".join([f"Input: {item['text'][0]}\nOutput: {item['text'][1]}"
                                    for item in below_threshold])
 
         # Add the data points classified as "too far"
         if above_threshold:
-            data_str += "\n### Data Points Too Far (Above Threshold) ###\n"
-            data_str += "\n".join([f"Input: {item['text'][0]}\nOutput: {item['text'][1]}\nStatus: Too far from others"
+            data_str += "\n### Data Points Too Far From All ###\n"
+            data_str += "\n".join([f"Input: {item['text'][0]}\nOutput: {item['text'][1]}"
                                    for item in above_threshold])
 
         # Add the data points classified as "in range"
         if within_range:
-            data_str += "\n### Data Points Inside Threshold ###\n"
+            data_str += "\n### Data Points Just Right ###\n"
             data_str += "\n".join(
-                [f"Input: {item['text'][0]}\nOutput: {item['text'][1]}\nStatus: Just right"
+                [f"Input: {item['text'][0]}\nOutput: {item['text'][1]}"
                  for item in within_range])
 
         # Add the data points classified as "too far"
         if previous_examples:
             data_str += "\n### Previous examples ###\n"
             data_str += "\n".join(
-                [f"Input: {item['text'][0]}\nOutput: {item['text'][1]}\nStatus: Given example"
+                [f"Input: {item['text'][0]}\nOutput: {item['text'][1]}"
                  for item in previous_examples])
 
         # Create an LLMChain with the model and the prompt
