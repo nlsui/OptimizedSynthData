@@ -136,7 +136,7 @@ def synthesize_data_few_shot(input_output_pairs, config: Config = None):
         data_blocks.append(within_threshold)
 
         # Feed the generated pairs along with their respective distances to the analyzer's analyze function
-        report = analyzer.analyze(below_threshold, above_threshold)
+        report = analyzer.analyze(below_threshold, above_threshold, within_threshold, input_output_pairs)
         print(report)
 
     preprocessing.plot_similarity(tas2vec_embeddings)
