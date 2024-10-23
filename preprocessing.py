@@ -28,20 +28,20 @@ class PandasDataset(Dataset):
         return input_tensor, output_tensor
 
 
-def preprocess_dataset(dataset, tokenizer, max_length=512):
+def preprocess_dataset(data_points, tokenizer, max_length=512):
     # Set pad_token if it doesn't exist
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
-    # Process input-output pairs directly from tuples
+    # Process input-output pairs from DataPoint objects
     processed_data = {
         'input': [
-            tokenizer(input_text, padding='max_length', truncation=True, max_length=max_length)['input_ids']
-            for input_text, _ in dataset
+            tokenizer(dp.input, padding='max_length', truncation=True, max_length=max_length)['input_ids']
+            for dp in data_points
         ],
         'output': [
-            tokenizer(output_text, padding='max_length', truncation=True, max_length=max_length)['input_ids']
-            for _, output_text in dataset
+            tokenizer(dp.output, padding='max_length', truncation=True, max_length=max_length)['input_ids']
+            for dp in data_points
         ]
     }
 
