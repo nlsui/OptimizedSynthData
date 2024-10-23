@@ -90,11 +90,11 @@ def synthesize_data_few_shot(input_output_pairs, config: Config = None):
 
     # calculate metrics of initial data
     tas2vec_embeddings = [task2vec.embed(input_output_pairs)]
-    initial_data = encoder(input_output_pairs)
-    data_blocks = [initial_data]
+    few_shots = encoder(input_output_pairs)
+    data_blocks = [few_shots]
 
     # Step 1: Calculate the thresholds based on the embeddings
-    embeddings = [item['embedding'] for item in initial_data]
+    embeddings = [item.embedding for item in few_shots]
     lower_threshold, upper_threshold = calculate_threshold(embeddings)
 
     print("lower threshold:", lower_threshold)
@@ -102,13 +102,13 @@ def synthesize_data_few_shot(input_output_pairs, config: Config = None):
 
     for i in range(config.block_size):
         # Generate new data using the input-output pairs
-        generated_data = generator.generate(input_output_pairs)
+        generated_data = generator.generate(few_shots)
 
         # Calculate embeddings for the generated data using the analyzer (or any embedding function)
-        data = encoder(generated_data)
+        generated_data = encoder(generated_data)
 
         # Step 2: Classify the embeddings based on the calculated thresholds
-        within_threshold, below_threshold, above_threshold = classify_embeddings(data, lower_threshold, upper_threshold)
+        within_threshold, below_threshold, above_threshold = classify_embeddings(generated_data, lower_threshold, upper_threshold)
 
         # Print results
         print("Within Threshold:", len(within_threshold))
@@ -119,11 +119,11 @@ def synthesize_data_few_shot(input_output_pairs, config: Config = None):
         data_blocks.append(within_threshold)
 
         # Feed the generated pairs along with their respective distances to the analyzer's analyze function
-        new_few_shots = analyzer.analyze(below_threshold, above_threshold, within_threshold, initial_data)
-        print(new_few_shots)
+        few_shots = analyzer.analyze(below_threshold, above_threshold, within_threshold, few_shots)
+        print(few_shots)
 
         # use analyzer output as new fex-shot examples
-        initial_data = encoder(input_output_pairs)
+        few_shots = encoder(few_shots)
 
     preprocessing.plot_similarity(tas2vec_embeddings)
 

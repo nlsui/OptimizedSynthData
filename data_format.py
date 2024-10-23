@@ -43,6 +43,6 @@ def _remove_instructions(response_text):
 
 def _datapoint_to_string(datapoint: DataPoint) -> str:
     """
-    Converts a DataPoint object to a string in the format {"Input": ..., "Output": ...}.
+    Converts a DataPoint object to a string in the format {"input": ..., "output": ...}.
     """
-    return f'{{"Input":"{datapoint.input}","Output":"{datapoint.output}"}}'
+    return f'{{"input":"{datapoint.input}","output":"{datapoint.output}"}}'

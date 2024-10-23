@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from langchain import HuggingFacePipeline, PromptTemplate, LLMChain
 
-from data_format import _parse_generated_pairs
+from data_format import _parse_generated_pairs, _datapoint_to_string
 
 
 class Generator:
@@ -30,7 +30,7 @@ class Generator:
 
     def generate(self, input_output_pairs):
         # Convert list of input-output pairs to string format
-        pairs_str = "\n".join([f'{{"Input":"{pair[0]}","Output":"{pair[1]}"}}' for pair in input_output_pairs])
+        pairs_str = "\n".join([_datapoint_to_string(dp) for dp in input_output_pairs])
 
         random.seed(None)
         torch.manual_seed(torch.seed())
