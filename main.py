@@ -146,16 +146,19 @@ def main():
         ("What is the smallest prime number?", "2")
     ]
 
+    # Convert each tuple into the required JSON-like format using a loop or list comprehension
+    pairs_str = "\n".join([f'{{"input":"{pair[0]}","output":"{pair[1]}"}}' for pair in input_output_pairs])
+
+    few_shots = _parse_generated_pairs(pairs_str)
+
     # Call the synthesize_data function with the 10 input-output pairs
-    data = synthesize_data_few_shot(input_output_pairs)
+    data = synthesize_data_few_shot(few_shots)
     # Loop through the data_blocks and print only the input-output pairs
     for block_idx, block in enumerate(data):
         print(f"\nData Block {block_idx + 1}:\n")
         for item in block:
-            # Extract and print only the input-output pair from the dictionary
-            input_text, output_text = item['text']
-            print(f"Input: {input_text}")
-            print(f"Output: {output_text}")
+            print(f"input: {item.input}")
+            print(f"output: {item.output}")
 
 
 if __name__ == "__main__":
