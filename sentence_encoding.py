@@ -10,8 +10,25 @@ class SentenceEncoder:
         # Reduce logging output.
         logging.set_verbosity(logging.ERROR)
 
-    def __call__(self, input_output_pairs):
-        input_text = [f"{pair[0]} {pair[1]}" for pair in input_output_pairs]
-        # This allows the instance to be called like a function
-        return self.model(input_text)
+    def __call__(self, data_points):
+        """
+        Embeds the input-output pairs in the given DataPoint objects and stores the embedding in the 'embedding' attribute.
+
+        Parameters:
+        data_points (list of DataPoint): A list of DataPoint objects.
+
+        Returns:
+        List[DataPoint]: The same list of DataPoint objects with the 'embedding' attribute populated.
+        """
+        # Prepare input text by combining 'input' and 'output' from each DataPoint
+        input_text = [f"{dp.input} {dp.output}" for dp in data_points]
+
+        # Generate embeddings by calling the model
+        embeddings = self.model(input_text)
+
+        # Populate the 'embedding' attribute for each DataPoint
+        for dp, embedding in zip(data_points, embeddings):
+            dp.embedding = embedding
+
+        return data_points
 

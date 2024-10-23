@@ -29,25 +29,6 @@ encoder = sentence_encoding.SentenceEncoder()
 logging.set_verbosity(logging.ERROR)
 
 
-def embed(input_output_pairs):
-    """
-    Embeds the input-output pairs and returns a list of dictionaries with 'text' and 'embedding'.
-
-    Parameters:
-    input_output_pairs (list of tuples): A list of input-output pairs (e.g., [('input1', 'output1'), ...]).
-
-    Returns:
-    List[Dict]: A list of dictionaries where each contains 'text' (the input-output pair) and 'embedding'.
-    """
-    # Generate embeddings for the input-output pairs using the encoder
-    embeddings = encoder(input_output_pairs)
-
-    # Create the list of dictionaries
-    embedded_data = [{'text': pair, 'embedding': embedding} for pair, embedding in zip(input_output_pairs, embeddings)]
-
-    return embedded_data
-
-
 def initialize_model(quantization_config, model_name):
     model_4bit = preprocessing.MistralForCausalLMWithSkip.from_pretrained(
         model_name,
@@ -109,7 +90,7 @@ def synthesize_data_few_shot(input_output_pairs, config: Config = None):
 
     # calculate metrics of initial data
     tas2vec_embeddings = [task2vec.embed(input_output_pairs)]
-    initial_data = embed(input_output_pairs)
+    initial_data = encoder(input_output_pairs)
     data_blocks = [initial_data]
 
     # Step 1: Calculate the thresholds based on the embeddings
@@ -124,7 +105,7 @@ def synthesize_data_few_shot(input_output_pairs, config: Config = None):
         generated_data = generator.generate(input_output_pairs)
 
         # Calculate embeddings for the generated data using the analyzer (or any embedding function)
-        data = embed(generated_data)
+        data = encoder(generated_data)
 
         # Step 2: Classify the embeddings based on the calculated thresholds
         within_threshold, below_threshold, above_threshold = classify_embeddings(data, lower_threshold, upper_threshold)
@@ -138,12 +119,11 @@ def synthesize_data_few_shot(input_output_pairs, config: Config = None):
         data_blocks.append(within_threshold)
 
         # Feed the generated pairs along with their respective distances to the analyzer's analyze function
-        report = analyzer.analyze(below_threshold, above_threshold, within_threshold, initial_data)
-        print(report)
+        new_few_shots = analyzer.analyze(below_threshold, above_threshold, within_threshold, initial_data)
+        print(new_few_shots)
 
         # use analyzer output as new fex-shot examples
-        input_output_pairs = _parse_generated_pairs(report)
-        initial_data = embed(input_output_pairs)
+        initial_data = encoder(input_output_pairs)
 
     preprocessing.plot_similarity(tas2vec_embeddings)
 

@@ -39,3 +39,10 @@ def _remove_instructions(response_text):
     # Remove anything between [INST] and [/INST]
     cleaned_text = re.sub(r"\[INST\](.*?)\[/INST\] ", "", response_text, flags=re.DOTALL)
     return cleaned_text
+
+
+def _datapoint_to_string(datapoint: DataPoint) -> str:
+    """
+    Converts a DataPoint object to a string in the format {"Input": ..., "Output": ...}.
+    """
+    return f'{{"Input":"{datapoint.input}","Output":"{datapoint.output}"}}'
