@@ -1,6 +1,6 @@
 from langchain import HuggingFacePipeline, PromptTemplate, LLMChain
 
-from data_format import _datapoint_to_string, _parse_generated_pairs
+from data_format import _datapoint_to_string, _parse_generated_pairs, format_string
 
 
 class Analyzer:
@@ -21,11 +21,12 @@ class Analyzer:
         Based on these results, adjust the examples fo the next generation. Remove examples that might have caused 
         the generation of bad data (should be data that's similar to a bad data-point)
         and replace it with a good classified generated pair.
-        The output should be 10 curated input output pairs in the same format as the given examples!
+        The output should be 10 curated input output pairs in this format:
+        {format}
         [/INST]"""
 
         # Set up the PromptTemplate object
-        self.adjust_examples_prompt = PromptTemplate(template=self.adjust_examples_template, input_variables=["examples", "data"])
+        self.adjust_examples_prompt = PromptTemplate(template=self.adjust_examples_template, input_variables=["format", "examples", "data"])
 
     def analyze(self, below_threshold, above_threshold, within_range, previous_examples):
         """
@@ -67,7 +68,7 @@ class Analyzer:
         llm_chain = LLMChain(prompt=self.adjust_examples_prompt, llm=self.llm)
 
         # Generate the report using the formatted data
-        report = llm_chain.run({"examples": example_str, "data": data_str})
+        report = llm_chain.run({"format": format_string, "examples": example_str, "data": data_str})
 
         print(report)
 
