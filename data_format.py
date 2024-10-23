@@ -3,6 +3,8 @@ import re
 from dataclasses import dataclass
 import numpy as np  # Assuming embeddings are stored as numpy arrays or similar
 
+format_string = """{"input":"<input_example>","output":"<output_example>"}"""
+
 
 @dataclass
 class DataPoint:

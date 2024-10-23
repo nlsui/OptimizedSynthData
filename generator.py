@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from langchain import HuggingFacePipeline, PromptTemplate, LLMChain
 
-from data_format import _parse_generated_pairs, _datapoint_to_string
+from data_format import _parse_generated_pairs, _datapoint_to_string, format_string
 
 
 class Generator:
@@ -15,7 +15,7 @@ class Generator:
         self.template = """[INST] You are a data generation assistant. Your task is to generate new data points 
         that are similar to the given input-output pairs. Use the input-output format provided and generate 
         new examples that follow the same structure. The format is:
-        {"input":"<input_example>","output":"<output_example>"}
+        {format}
 
         Here are the input-output pairs:
         {pairs}
@@ -24,7 +24,7 @@ class Generator:
         Only output the new data points in the same format, do not include any extra text. [/INST]"""
 
         # Set up the PromptTemplate object
-        self.prompt = PromptTemplate(template=self.template, input_variables=["pairs", "block_size"])
+        self.prompt = PromptTemplate(template=self.template, input_variables=["format", "pairs", "block_size"])
         self.block_size = block_size
 
     def generate(self, input_output_pairs):
@@ -39,7 +39,7 @@ class Generator:
         llm_chain = LLMChain(prompt=self.prompt, llm=self.llm)
 
         # Generate a response using the string format of pairs
-        response = llm_chain.run({"pairs": pairs_str, "block_size": self.block_size})
+        response = llm_chain.run({"format": format_string, "pairs": pairs_str, "block_size": self.block_size})
 
         print(response)
 
