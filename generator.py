@@ -1,5 +1,5 @@
 import random
-
+import json
 import numpy as np
 import torch
 from langchain import HuggingFacePipeline, PromptTemplate, LLMChain
@@ -18,19 +18,20 @@ def _remove_instructions(response_text):
 def _parse_generated_pairs(response_text):
     lines = _remove_instructions(response_text).splitlines()
     new_pairs = []
-    input_text, output_text = None, None
 
     for line in lines:
-        if line.startswith("Input:"):
+        # Try to parse each line as a JSON object
+        try:
+            pair = json.loads(line)
+            input_text = pair.get("input", "").strip()
+            output_text = pair.get("output", "").strip()
+
+            # Add the parsed input-output pair to the list
             if input_text and output_text:
                 new_pairs.append((input_text, output_text))
-            input_text = line.replace("Input:", "").strip()
-            output_text = None  # Reset output
-        elif line.startswith("Output:"):
-            output_text = line.replace("Output:", "").strip()
-
-    if input_text and output_text:
-        new_pairs.append((input_text, output_text))
+        except json.JSONDecodeError:
+            # Skip lines that don't match the JSON format
+            continue
 
     return new_pairs
 
@@ -59,7 +60,7 @@ class Generator:
 
     def generate(self, input_output_pairs):
         # Convert list of input-output pairs to string format
-        pairs_str = "\n".join([f"Input: {pair[0]}\nOutput: {pair[1]}" for pair in input_output_pairs])
+        pairs_str = "\n".join([f'{{"input":"{pair[0]}","output":"{pair[1]}"}}' for pair in input_output_pairs])
 
         random.seed(None)
         torch.manual_seed(torch.seed())
