@@ -45,26 +45,26 @@ class Analyzer:
         # Add the data points classified as "too close"
         if below_threshold:
             data_str += "\n### Data Points Too Close To Others ###\n"
-            data_str += "\n".join([f'{{"Input":"{item['text'][0]}","Output":"{item['text'][1]}"}}'
+            data_str += "\n".join([f'{{"Input":"{item["text"][0]}","Output":"{item["text"][1]}"}}'
                                    for item in below_threshold])
 
         # Add the data points classified as "too far"
         if above_threshold:
             data_str += "\n### Data Points Too Far From All ###\n"
-            data_str += "\n".join([f'{{"Input":"{item['text'][0]}","Output":"{item['text'][1]}"}}'
+            data_str += "\n".join([f'{{"Input":"{item["text"][0]}","Output":"{item["text"][1]}"}}'
                                    for item in above_threshold])
 
         # Add the data points classified as "in range"
         if within_range:
             data_str += "\n### Data Points Just Right ###\n"
             data_str += "\n".join(
-                [f'{{"Input":"{item['text'][0]}","Output":"{item['text'][1]}"}}'
+                [f'{{"Input":"{item["text"][0]}","Output":"{item["text"][1]}"}}'
                  for item in within_range])
 
         # Add the data points classified as "too far"
         if previous_examples:
             example_str += "\n".join(
-                [f'{{"Input":"{item['text'][0]}","Output":"{item['text'][1]}"}}'
+                [f'{{"Input":"{item["text"][0]}","Output":"{item["text"][1]}"}}'
                  for item in previous_examples])
 
         # Create an LLMChain with the model and the prompt

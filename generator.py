@@ -60,7 +60,7 @@ class Generator:
 
     def generate(self, input_output_pairs):
         # Convert list of input-output pairs to string format
-        pairs_str = "\n".join([f'{{"input":"{pair[0]}","output":"{pair[1]}"}}' for pair in input_output_pairs])
+        pairs_str = "\n".join([f'{{"Input":"{pair[0]}","Output":"{pair[1]}"}}' for pair in input_output_pairs])
 
         random.seed(None)
         torch.manual_seed(torch.seed())
