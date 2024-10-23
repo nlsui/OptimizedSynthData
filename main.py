@@ -142,6 +142,7 @@ def synthesize_data_few_shot(input_output_pairs, config: Config = None):
 
         # use analyzer output as new fex-shot examples
         input_output_pairs = _parse_generated_pairs(report)
+        initial_data = embed(input_output_pairs)
 
     preprocessing.plot_similarity(tas2vec_embeddings)
 
