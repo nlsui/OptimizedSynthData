@@ -7,7 +7,8 @@ from transformers import BitsAndBytesConfig, AutoTokenizer, pipeline
 import preprocessing
 import sentence_encoding
 from analyzer import Analyzer
-from generator import Generator, _parse_generated_pairs
+from generator import Generator
+from data_format import _parse_generated_pairs
 from metrics import calculate_threshold, classify_embeddings
 
 
