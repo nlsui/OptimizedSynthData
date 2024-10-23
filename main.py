@@ -139,8 +139,9 @@ def synthesize_data_few_shot(input_output_pairs, config: Config = None):
         # Feed the generated pairs along with their respective distances to the analyzer's analyze function
         report = analyzer.analyze(below_threshold, above_threshold, within_threshold, initial_data)
         print(report)
-        new_inputs = _parse_generated_pairs(report)
-        print(new_inputs)
+
+        # use analyzer output as new fex-shot examples
+        input_output_pairs = _parse_generated_pairs(report)
 
     preprocessing.plot_similarity(tas2vec_embeddings)
 
