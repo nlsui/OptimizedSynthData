@@ -14,11 +14,18 @@ class DataPoint:
 
 
 def _parse_generated_pairs(response_text):
-    lines = _remove_instructions(response_text).splitlines()  # Assuming _remove_instructions is defined elsewhere
+    """
+    Parses the generated text and returns a list of DataPoint objects.
+    Handles cases where lines have numbering or irregular formatting.
+    """
+    lines = _remove_instructions(response_text).splitlines()
     data_points = []
 
     for line in lines:
-        # Try to parse each line as a JSON object
+        # Remove any leading numbering like "1.", "2.", etc.
+        line = re.sub(r"^\d+\.\s*", "", line).strip()
+
+        # Try to parse the line as JSON
         try:
             pair = json.loads(line)
             input_text = pair.get("input", "").strip()
@@ -28,7 +35,8 @@ def _parse_generated_pairs(response_text):
             if input_text and output_text:
                 data_points.append(DataPoint(input=input_text, output=output_text))
         except json.JSONDecodeError:
-            # Skip lines that don't match the JSON format
+            # Log a warning and continue if the line is not valid JSON
+            print(f"Warning: Skipping invalid line - {line}")
             continue
 
     return data_points
@@ -39,7 +47,7 @@ def _remove_instructions(response_text):
     Remove everything between [INST] and [/INST] tags.
     """
     # Remove anything between [INST] and [/INST]
-    cleaned_text = re.sub(r"\[INST\](.*?)\[/INST\] ", "", response_text, flags=re.DOTALL)
+    cleaned_text = re.sub(r"\[INST\](.*?)\[/INST\]", "", response_text, flags=re.DOTALL).strip()
     return cleaned_text
 
 
