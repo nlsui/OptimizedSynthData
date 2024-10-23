@@ -15,8 +15,7 @@ class Generator:
         self.template = """[INST] You are a data generation assistant. Your task is to generate new data points 
         that are similar to the given input-output pairs. Use the input-output format provided and generate 
         new examples that follow the same structure. The format is:
-        Input: <input_example>
-        Output: <output_example>
+        {"input":"<input_example>","output":"<output_example>"}
 
         Here are the input-output pairs:
         {pairs}
