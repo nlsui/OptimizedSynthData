@@ -19,14 +19,7 @@ class Analyzer:
         Based on these results, adjust the examples fo the next generation. Remove examples that might have caused 
         the generation of bad data (should be data that's similar to a bad data-point)
         and replace it with a good classified generated pair.
-        The output should be 10 curated input output pairs in this format:
-        Input:
-        Output:
-        
-        Input:
-        Output:
-        
-        ...
+        The output should be 10 curated input output pairs in the same format as the given examples!
         [/INST]"""
 
         # Set up the PromptTemplate object
@@ -70,8 +63,7 @@ class Analyzer:
 
         # Add the data points classified as "too far"
         if previous_examples:
-            data_str += "\n### Previous examples ###\n"
-            data_str += "\n".join(
+            example_str += "\n".join(
                 [f"Input: {item['text'][0]}\nOutput: {item['text'][1]}"
                  for item in previous_examples])
 
