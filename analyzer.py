@@ -69,6 +69,8 @@ class Analyzer:
         # Generate the report using the formatted data
         report = llm_chain.run({"examples": example_str, "data": data_str})
 
+        print(report)
+
         # Parse the report back into DataPoint objects
         parsed_datapoints = _parse_generated_pairs(report)
 
