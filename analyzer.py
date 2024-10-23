@@ -19,7 +19,15 @@ class Analyzer:
         Based on these results, adjust the examples fo the next generation. Remove examples that might have caused 
         the generation of bad data (should be data that's similar to a bad data-point)
         and replace it with a good classified generated pair.
-        The output should be 10 curated input output pairs.[/INST]"""
+        The output should be 10 curated input output pairs in this format:
+        Input:
+        Output:
+        
+        Input:
+        Output:
+        
+        ...
+        [/INST]"""
 
         # Set up the PromptTemplate object
         self.adjust_examples_prompt = PromptTemplate(template=self.adjust_examples_template, input_variables=["data"])
