@@ -8,7 +8,7 @@ import numpy as np  # Assuming embeddings are stored as numpy arrays or similar
 class DataPoint:
     input: str
     output: str
-    embedding: np.ndarray  # or list, depending on how embeddings are represented
+    embedding: np.ndarray = None  # or list, depending on how embeddings are represented
 
 
 def _parse_generated_pairs(response_text):
