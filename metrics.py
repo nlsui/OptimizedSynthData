@@ -77,7 +77,7 @@ def classify_embeddings(data, lower_threshold, upper_threshold):
     above_threshold = []
 
     # Extract embeddings
-    embeddings = [item['embedding'] for item in data]
+    embeddings = [item.embedding for item in data]
 
     # Calculate nearest neighbor distances
     pairwise_distances = cdist(embeddings, embeddings, metric='euclidean')
